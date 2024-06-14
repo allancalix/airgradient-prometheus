@@ -54,9 +54,9 @@ display:
         lambda: |-
           it.printf(0, 0, id(arimo10), "%s", id(esp_ip_address).state.c_str());
           it.printf(0, 9, id(arimo10), "CO2: %.0f", id(co2).state);
-          it.printf(0, 18, id(arimo10), "PM1: %.0f", id(pm10).state);
           it.printf(0, 27, id(arimo10), "PM2.5: %.0f", id(pm25).state);
           it.printf(0, 36, id(arimo10), "PM10: %.0f", id(pm100).state);
+          it.printf(0, 18, id(arimo10), "TVOC: %.0f", id(tvoc).state);
           it.printf(0, 45, id(arimo10), "TEMP: %.0fC HUM: %.0f%%", id(temp).state, id(humidity).state);
 
 # Provide a /metrics endpoint for Prometheus
@@ -84,6 +84,7 @@ uart:
 
 sensor:
   - platform: sht3xd
+    update_interval: 5s
     temperature:
       id: temp
       name: "Temperature"
@@ -91,9 +92,9 @@ sensor:
       id: humidity
       name: "Humidity"
     address: 0x44
-    update_interval: 5s
 
   - platform: pmsx003
+    update_interval: 60s
     # type can be PMSX003, PMS5003S, PMS5003T, PMS5003ST
     # https://esphome.io/components/sensor/pmsx003.html
     type: PMSX003
@@ -104,10 +105,23 @@ sensor:
     pm_2_5:
       id: pm25
       name: "Particulate Matter <2.5µm Concentration"
-    update_interval: 60s
     pm_10_0:
       id: pm100
       name: "Particulate Matter <10.0µm Concentration"
+
+  # Enables the SGP41 TVOC/NOx sensor.
+  - platform: sgp4x
+    update_interval: 60s
+    voc:
+      id: tvoc
+      name: "VOC Index"
+    nox:
+      id: nox
+      name: "NOx Index"
+    compensation:
+      temperature_source: temp
+      humidity_source: humidity
+
 # If you have a version of the PMS*003* sensor that supports formaldehyde, uncomment the below block
 #    formaldehyde:
 #      id: hcho
